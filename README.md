@@ -104,6 +104,23 @@ The page uses these metrics:
 
 The API cards and chart are refreshed every 5 minutes.
 
+## How to check that Prometheus is used
+
+Open the status page and look at the badge under the title:
+
+```text
+Prometheus connected: http://localhost:9090
+```
+
+If Prometheus is stopped or unreachable, the badge changes to disconnected and
+the main banner shows `Prometheus unavailable`.
+
+You can also compare the values with Prometheus directly:
+
+```shell
+curl "http://localhost:9090/api/v1/query?query=up"
+```
+
 ## Customize Prometheus
 
 The Prometheus URL and queries are in:

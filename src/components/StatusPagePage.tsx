@@ -31,6 +31,13 @@ const useStyles = makeStyles((theme) => ({
   header: { padding: theme.spacing(5, 0, 3) },
   logo: { fontSize: 30, fontWeight: 700 },
   muted: { color: theme.palette.text.secondary },
+  sourceStatus: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+    alignItems: "center",
+    marginTop: theme.spacing(1),
+  },
   banner: {
     background: "#28a745",
     color: "#fff",
@@ -642,6 +649,20 @@ export const StatusPagePage = () => {
               <Typography className={classes.muted}>
                 Kubernetes platform status
               </Typography>
+              <Box className={classes.sourceStatus}>
+                <Chip
+                  size="small"
+                  label={
+                    hasPrometheusError
+                      ? `Prometheus disconnected: ${PROMETHEUS_BASE_URL}`
+                      : `Prometheus connected: ${PROMETHEUS_BASE_URL}`
+                  }
+                  color={hasPrometheusError ? "secondary" : "primary"}
+                />
+                <Typography className={classes.muted}>
+                  Metrics loaded from `/api/v1/query` and `/api/v1/query_range`.
+                </Typography>
+              </Box>
             </Box>
 
             <Box
