@@ -2,20 +2,18 @@
 
 Simple status page plugin for Backstage.
 
-It adds a `/statuspage` page where users can see the health of platform
-services, metrics, components, and recent incidents.
+It adds a `/statuspage` page where users can see live Prometheus metrics for
+their Kubernetes platform.
 
 ## Preview
 
-The page gives a quick overview of the platform health, live-looking metrics,
-component status, and uptime history.
+The page gives a quick overview of the platform health, Prometheus connection
+status, live metrics, and Kubernetes component status.
 
-![Status page overview](docs/images/statuspage-overview.png)
+When Prometheus is stopped or unreachable, the page detects it and clearly shows
+that the metrics source is disconnected.
 
-Users can also search incidents, see severity and status labels, and open each
-incident to read more details.
-
-![Status page incidents](docs/images/statuspage-incidents.png)
+![Prometheus unavailable proof](docs/images/statuspage-prometheus-unavailable.png)
 
 ## What you get
 
@@ -24,10 +22,9 @@ incident to read more details.
 - API error rate
 - Scheduler issues
 - Kubernetes component status
-- 90-day uptime history
 - Metrics chart
-- Searchable incident history
-- Expandable incident details
+- Prometheus connection badge
+- Prometheus unavailable state
 
 The metrics come directly from Prometheus. By default, the plugin reads
 Prometheus from:
