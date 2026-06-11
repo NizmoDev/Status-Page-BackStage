@@ -29,9 +29,15 @@ incident to read more details.
 - Searchable incident history
 - Expandable incident details
 
-The plugin currently uses sample data. You can keep it as a demo page or replace
-the sample data with your own monitoring data from Prometheus, Grafana,
-PagerDuty, Opsgenie, Kubernetes, or your own backend API.
+The metrics come directly from Prometheus. By default, the plugin reads
+Prometheus from:
+
+```text
+http://localhost:9090
+```
+
+It uses the Prometheus HTTP API, for example
+`/api/v1/query` and `/api/v1/query_range`.
 
 ## Install
 
@@ -81,13 +87,30 @@ yarn install
 yarn start
 ```
 
-## Customize the data
+Make sure Prometheus is also running locally:
 
-The page data is in:
+```text
+http://localhost:9090
+```
+
+## Prometheus metrics
+
+The page uses these metrics:
+
+- `apiserver_request_total`
+- `scheduler_schedule_attempts_total`
+- `kube_node_status_condition`
+- `kube_node_info`
+
+The API cards and chart are refreshed every 5 minutes.
+
+## Customize Prometheus
+
+The Prometheus URL and queries are in:
 
 ```text
 src/components/StatusPagePage.tsx
 ```
 
-Replace the sample services, incidents, and metric values with data from your
-own systems.
+Change `PROMETHEUS_BASE_URL` if your Prometheus instance is not available at
+`http://localhost:9090`.
