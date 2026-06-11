@@ -5,6 +5,18 @@ Simple status page plugin for Backstage.
 It adds a `/statuspage` page where users can see the health of platform
 services, metrics, components, and recent incidents.
 
+## Preview
+
+The page gives a quick overview of the platform health, live-looking metrics,
+component status, and uptime history.
+
+![Status page overview](docs/images/statuspage-overview.png)
+
+Users can also search incidents, see severity and status labels, and open each
+incident to read more details.
+
+![Status page incidents](docs/images/statuspage-incidents.png)
+
 ## What you get
 
 - Global status banner
