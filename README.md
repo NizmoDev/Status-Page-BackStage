@@ -10,6 +10,11 @@ their Kubernetes platform.
 The page gives a quick overview of the platform health, Prometheus connection
 status, live metrics, and Kubernetes component status.
 
+When Prometheus is running, the page shows live values from
+`http://localhost:9090`.
+
+![Prometheus connected proof](docs/images/statuspage-prometheus-connected.png)
+
 When Prometheus is stopped or unreachable, the page detects it and clearly shows
 that the metrics source is disconnected.
 
