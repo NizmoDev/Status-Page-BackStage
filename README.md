@@ -31,8 +31,11 @@ that the metrics source is disconnected.
 - Prometheus connection badge
 - Prometheus unavailable state
 
-The metrics come directly from Prometheus. By default, the plugin reads
-Prometheus from:
+The metrics come directly from Prometheus. The Prometheus URL is configurable,
+so the plugin can work on a local laptop, a VM, a container, or with a remote
+Prometheus server.
+
+By default, the plugin reads Prometheus from:
 
 ```text
 http://localhost:9090
@@ -51,6 +54,54 @@ yarn workspace app add NizmoDev/Status-Page-BackStage
 
 If your frontend app package is not named `app`, replace `app` with your app
 workspace name.
+
+## Configure Prometheus
+
+Add this to your Backstage `app-config.yaml`:
+
+```yaml
+statuspage:
+  prometheusUrl: ${PROMETHEUS_URL}
+```
+
+Then set the environment variable before starting Backstage.
+
+For a local Prometheus:
+
+```shell
+export PROMETHEUS_URL=http://localhost:9090
+yarn start
+```
+
+For a remote Prometheus:
+
+```shell
+export PROMETHEUS_URL=https://prometheus.example.com
+yarn start
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:PROMETHEUS_URL = "http://localhost:9090"
+yarn start
+```
+
+The plugin reads this Backstage config value:
+
+```yaml
+statuspage.prometheusUrl
+```
+
+You can also set the URL directly without an environment variable:
+
+```yaml
+statuspage:
+  prometheusUrl: http://localhost:9090
+```
+
+If `statuspage.prometheusUrl` is not set, the plugin falls back to
+`http://localhost:9090`.
 
 ## Use with the new Backstage frontend system
 
@@ -95,6 +146,12 @@ Make sure Prometheus is also running locally:
 http://localhost:9090
 ```
 
+You can also use a remote URL by setting:
+
+```shell
+export PROMETHEUS_URL=https://prometheus.example.com
+```
+
 ## Prometheus metrics
 
 The page uses these metrics:
@@ -123,7 +180,34 @@ You can also compare the values with Prometheus directly:
 curl "http://localhost:9090/api/v1/query?query=up"
 ```
 
-## Customize Prometheus
+## Remote Prometheus and CORS
+
+The plugin runs in the browser, so direct remote Prometheus URLs must allow
+browser requests from your Backstage frontend origin.
+
+If your Prometheus server does not allow CORS, use the Backstage proxy instead:
+
+```yaml
+proxy:
+  endpoints:
+    /prometheus:
+      target: ${PROMETHEUS_URL}
+      changeOrigin: true
+
+statuspage:
+  prometheusUrl: /api/proxy/prometheus
+```
+
+Then set:
+
+```shell
+export PROMETHEUS_URL=https://prometheus.example.com
+```
+
+With this setup, the browser calls Backstage, and Backstage forwards the request
+to Prometheus.
+
+## Customize Prometheus queries
 
 The Prometheus URL and queries are in:
 
@@ -131,5 +215,5 @@ The Prometheus URL and queries are in:
 src/components/StatusPagePage.tsx
 ```
 
-Change `PROMETHEUS_BASE_URL` if your Prometheus instance is not available at
-`http://localhost:9090`.
+Change the `PROMETHEUS_QUERIES` object if your Prometheus metrics use different
+names or labels.

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Page, Content } from "@backstage/core-components";
+import { configApiRef, useApi } from "@backstage/core-plugin-api";
 import {
   Box,
   Chip,
@@ -103,7 +104,7 @@ type PrometheusResponse = {
   error?: string;
 };
 
-const PROMETHEUS_BASE_URL = "http://localhost:9090";
+const DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090";
 
 const PROMETHEUS_QUERIES = {
   successRate:
@@ -142,23 +143,28 @@ const createInitialMetricData = (): MetricPoint[] => {
 const formatMetricValue = (value: number) => Number(value.toFixed(2));
 
 const getPrometheusUrl = (
+  prometheusBaseUrl: string,
   endpoint: "query" | "query_range",
   params: Record<string, string | number>
 ) => {
+  const baseUrl = prometheusBaseUrl.replace(/\/$/, "");
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
     searchParams.set(key, String(value));
   });
 
-  return `${PROMETHEUS_BASE_URL}/api/v1/${endpoint}?${searchParams}`;
+  return `${baseUrl}/api/v1/${endpoint}?${searchParams}`;
 };
 
 const fetchPrometheus = async (
+  prometheusBaseUrl: string,
   endpoint: "query" | "query_range",
   params: Record<string, string | number>
 ) => {
-  const response = await fetch(getPrometheusUrl(endpoint, params));
+  const response = await fetch(
+    getPrometheusUrl(prometheusBaseUrl, endpoint, params)
+  );
 
   if (!response.ok) {
     throw new Error(
@@ -175,18 +181,24 @@ const fetchPrometheus = async (
   return payload.data?.result ?? [];
 };
 
-const fetchPrometheusValue = async (query: string) => {
-  const result = await fetchPrometheus("query", { query });
+const fetchPrometheusValue = async (
+  prometheusBaseUrl: string,
+  query: string
+) => {
+  const result = await fetchPrometheus(prometheusBaseUrl, "query", { query });
   const rawValue = result[0]?.value?.[1];
   const value = Number(rawValue);
 
   return Number.isFinite(value) ? value : 0;
 };
 
-const fetchPrometheusRange = async (query: string) => {
+const fetchPrometheusRange = async (
+  prometheusBaseUrl: string,
+  query: string
+) => {
   const end = Math.floor(Date.now() / 1000);
   const start = end - 35 * 60;
-  const result = await fetchPrometheus("query_range", {
+  const result = await fetchPrometheus(prometheusBaseUrl, "query_range", {
     query,
     start,
     end,
@@ -250,6 +262,11 @@ const serviceDefinitions = [
 
 export const StatusPagePage = () => {
   const classes = useStyles();
+  const configApi = useApi(configApiRef);
+  const prometheusBaseUrl = (
+    configApi.getOptionalString("statuspage.prometheusUrl") ??
+    DEFAULT_PROMETHEUS_BASE_URL
+  ).trim();
 
   const [apiData, setApiData] = useState<MetricPoint[]>(
     createInitialMetricData
@@ -315,11 +332,23 @@ export const StatusPagePage = () => {
           readyNodes,
           totalNodes,
         ] = await Promise.all([
-          fetchPrometheusRange(PROMETHEUS_QUERIES.successRate),
-          fetchPrometheusRange(PROMETHEUS_QUERIES.errorRate),
-          fetchPrometheusRange(PROMETHEUS_QUERIES.schedulerIssues),
-          fetchPrometheusValue(PROMETHEUS_QUERIES.readyNodes),
-          fetchPrometheusValue(PROMETHEUS_QUERIES.totalNodes),
+          fetchPrometheusRange(
+            prometheusBaseUrl,
+            PROMETHEUS_QUERIES.successRate
+          ),
+          fetchPrometheusRange(prometheusBaseUrl, PROMETHEUS_QUERIES.errorRate),
+          fetchPrometheusRange(
+            prometheusBaseUrl,
+            PROMETHEUS_QUERIES.schedulerIssues
+          ),
+          fetchPrometheusValue(
+            prometheusBaseUrl,
+            PROMETHEUS_QUERIES.readyNodes
+          ),
+          fetchPrometheusValue(
+            prometheusBaseUrl,
+            PROMETHEUS_QUERIES.totalNodes
+          ),
         ]);
 
         setApiData(
@@ -344,7 +373,7 @@ export const StatusPagePage = () => {
     const interval = window.setInterval(refreshMetrics, 5 * 60 * 1000);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [prometheusBaseUrl]);
 
   return (
     <Page themeId="tool">
@@ -361,8 +390,8 @@ export const StatusPagePage = () => {
                   size="small"
                   label={
                     hasPrometheusError
-                      ? `Prometheus disconnected: ${PROMETHEUS_BASE_URL}`
-                      : `Prometheus connected: ${PROMETHEUS_BASE_URL}`
+                      ? `Prometheus disconnected: ${prometheusBaseUrl}`
+                      : `Prometheus connected: ${prometheusBaseUrl}`
                   }
                   color={hasPrometheusError ? "secondary" : "primary"}
                 />
