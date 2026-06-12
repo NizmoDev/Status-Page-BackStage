@@ -56,6 +56,90 @@ http://localhost:9090
 It uses the Prometheus HTTP API, for example
 `/api/v1/query` and `/api/v1/query_range`.
 
+## What this plugin does not start for you
+
+This plugin only displays metrics in Backstage. It does not create a Kubernetes
+cluster, install Prometheus, install Grafana, or run `kubectl port-forward`
+automatically.
+
+Before opening `/statuspage`, you need:
+
+- A Kubernetes cluster if you want Kubernetes metrics.
+- A Prometheus instance scraping that cluster.
+- A Prometheus URL reachable by the Backstage frontend or by the Backstage
+  proxy.
+
+Grafana is optional. You only need Grafana if you also want to open Grafana
+dashboards. The Status Page plugin reads Prometheus directly.
+
+## Start from zero
+
+Use this path if you want the same local setup as the screenshots.
+
+If you already have a Prometheus URL, you can skip the Kubernetes and Helm
+steps. Go directly to **Configure Prometheus** and set `PROMETHEUS_URL` to your
+existing Prometheus URL.
+
+### 1. Start a Kubernetes cluster
+
+Use any Kubernetes cluster, for example `kind`, `minikube`, Docker Desktop
+Kubernetes, or a remote cluster.
+
+Verify that `kubectl` can reach it:
+
+```shell
+kubectl get nodes
+```
+
+### 2. Install Prometheus for Kubernetes metrics
+
+One common setup is `kube-prometheus-stack`:
+
+```shell
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --create-namespace
+```
+
+Wait until the pods are ready:
+
+```shell
+kubectl get pods -n monitoring
+```
+
+### 3. Expose Prometheus locally
+
+If Prometheus is inside the cluster and not exposed publicly, run:
+
+```shell
+kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+```
+
+Keep this terminal open while you use the Status Page.
+
+You can test Prometheus with:
+
+```shell
+curl "http://localhost:9090/api/v1/query?query=up"
+```
+
+### 4. Optional: expose Grafana
+
+Grafana is not required by this plugin. If you want to open Grafana dashboards
+too, run:
+
+```shell
+kubectl port-forward -n monitoring svc/monitoring-grafana 3001:80
+```
+
+Then open:
+
+```text
+http://localhost:3001
+```
+
 ## Install
 
 From your Backstage repository, install the plugin in your app:
@@ -114,6 +198,11 @@ statuspage:
 
 If `statuspage.prometheusUrl` is not set, the plugin falls back to
 `http://localhost:9090`.
+
+If Backstage runs in a container, `localhost` points to the container itself,
+not your host machine. In that case, use a reachable URL such as
+`http://host.docker.internal:9090`, a service DNS name, a remote Prometheus URL,
+or the Backstage proxy setup below.
 
 ## Use with the new Backstage frontend system
 
