@@ -71,30 +71,30 @@ Check that `kubectl` can reach your cluster:
 kubectl get nodes
 ```
 
-## Create A Backstage App From Zero
+## Clone Backstage From GitHub
 
-Skip this section if you already have a Backstage app.
+Skip this section if you already have a Backstage repository.
 
-Create a new Backstage application with the official Backstage create-app
-command:
-
-```shell
-npx @backstage/create-app@latest
-```
-
-The wizard asks for an app name. For example:
-
-```text
-my-backstage-app
-```
-
-Then go into the generated app:
+Clone the official Backstage repository:
 
 ```shell
-cd my-backstage-app
+git clone https://github.com/backstage/backstage.git
 ```
 
-Start Backstage once to verify that the app works before installing this plugin:
+Go into the repository:
+
+```shell
+cd backstage
+```
+
+Install dependencies:
+
+```shell
+yarn install
+```
+
+Start Backstage once to verify that the example app works before installing this
+plugin:
 
 ```shell
 yarn start
@@ -110,7 +110,8 @@ When this works, stop Backstage and continue with the plugin installation below.
 
 ## Quick Install In An Existing Backstage App
 
-Run this from the root of your Backstage repository:
+Run this from the root of your Backstage repository, for example the
+`backstage` folder cloned above:
 
 ```shell
 yarn workspace app add NizmoDev/Status-Page-BackStage
