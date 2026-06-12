@@ -20,6 +20,18 @@ that the metrics source is disconnected.
 
 ![Prometheus unavailable proof](docs/images/statuspage-prometheus-unavailable.png)
 
+## How it works
+
+Prometheus collects metrics from the Kubernetes cluster. The Status Page plugin
+uses the configured Prometheus URL to query these metrics and display them in
+Backstage.
+
+![Prometheus and Backstage flow](docs/images/prometheus-backstage-flow.png)
+
+In the current plugin, Prometheus powers the overall status, success/error
+metrics, scheduler metrics, ready node count, and charts. Incident data can be
+added later by connecting an incident provider or a custom backend API.
+
 ## What you get
 
 - Global status banner
