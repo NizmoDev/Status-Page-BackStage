@@ -3,23 +3,6 @@
 Simple Backstage plugin that displays live Prometheus metrics for a Kubernetes
 platform.
 
-## About
-
-Status Page Backstage is a reusable Backstage plugin for displaying Kubernetes
-platform health from Prometheus.
-
-Project link:
-
-```text
-https://github.com/NizmoDev/Status-Page-BackStage
-```
-
-Suggested GitHub topics:
-
-```text
-backstage, backstage-plugin, prometheus, kubernetes, status-page, monitoring, observability, devops, grafana, developer-portal
-```
-
 The page is available at `/statuspage` and shows:
 
 - Prometheus connection status
